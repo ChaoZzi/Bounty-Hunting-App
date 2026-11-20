@@ -1,0 +1,51 @@
+# ---------- Java / Maven ----------
+server/**/target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ---------- Node ----------
+admin/node_modules/
+admin/dist/
+admin/.vite/
+npm-debug.log*
+
+# ---------- Flutter / Dart ----------
+app/.dart_tool/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/build/
+app/.packages
+app/ios/Pods/
+app/android/.gradle/
+app/android/local.properties
+app/android/key.properties
+*.jks
+*.keystore
+
+# ---------- 运行时数据（不要提交） ----------
+data/
+logs/
+*.log
+
+# ---------- 构建产物 / 安装包 ----------
+dist/
+*.apk
+*.aab
+*.dill
+
+# ---------- IDE ----------
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# ---------- OS ----------
+Thumbs.db
+.DS_Store
+
+# ---------- 本地配置 ----------
+.env
+.env.local
+application-secret.yml

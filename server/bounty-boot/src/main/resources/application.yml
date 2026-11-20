@@ -1,0 +1,52 @@
+server:
+  port: 8080
+  address: 0.0.0.0
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
+spring:
+  application:
+    name: bounty
+  profiles:
+    active: local
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
+    default-property-inclusion: non_null
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  storage:
+    type: local
+    local-path: ./data/upload
+    public-prefix: http://127.0.0.1:8080/files/
+  mock:
+    # 本地固定验证码；生产环境置空即走随机 6 位
+    sms-code: "123456"
+
+logging:
+  level:
+    root: info
+    com.bounty: info

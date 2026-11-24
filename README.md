@@ -190,6 +190,7 @@ Unregister-ScheduledTask -TaskName BountyAppServer -Confirm:$false
 | 管理后台登录 / 总览 | ✅ 用户 2、任务 5、报名 1 |
 | 管理后台任务列表 / 审核接口 | ✅ 分页正常 |
 | 超时关单定时任务 | ✅ 含**开机补偿**：关机期间到期的单子，启动后一次性处理 |
+| App「我的任务」页 | ✅ 四态 Tab、分页、下拉刷新、竞态防护；模型单测 7/7 通过 |
 
 ## 待实现
 
@@ -214,6 +215,8 @@ Unregister-ScheduledTask -TaskName BountyAppServer -Confirm:$false
 | Gradle 下载 `zip END header not found` | 镜像给的是坏包 | curl 手动下 + `distributionUrl=file:///...` |
 | Kotlin 增量缓存 `Could not close incremental caches` | 文件被占用 | `gradle.properties` 里 `kotlin.incremental=false` |
 | Docker Hub 拉不下来 | 直连被墙 | 从 `docker.m.daocloud.io` 拉再 `docker tag` |
+| `ninja: FindFirstFileExA ... 语法不正确` | 用户名含中文，Ninja 处理不了 `C:\Users\姜盛超\AppData\...` | 设 `PUB_CACHE=D:\dev\pub-cache`，再 `flutter clean && flutter pub get` |
+| `git push` 报 `Host key verification failed` | Git 自带 SSH 解析不了中文用户名，找不到 known_hosts | `git config --global core.sshCommand "C:/Windows/System32/OpenSSH/ssh.exe"` |
 
 ---
 

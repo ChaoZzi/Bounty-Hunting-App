@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/api.dart';
 import '../core/app_config.dart';
 import '../core/theme.dart';
+import 'my_orders_page.dart';
 import 'server_page.dart';
 
 class MinePage extends StatefulWidget {
@@ -102,6 +103,24 @@ class _MinePageState extends State<MinePage> {
                       ),
                     ),
                     const SizedBox(height: 16),
+                    // 我的任务：报名记录的入口
+                    DarkCard(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const MyOrdersPage()),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.assignment_outlined,
+                              size: 18, color: AppColors.textSecondary),
+                          SizedBox(width: 12),
+                          Text('我的任务',
+                              style: TextStyle(color: AppColors.textPrimary)),
+                          Spacer(),
+                          Icon(Icons.chevron_right, color: AppColors.textTertiary),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     DarkCard(
                       onTap: () async {
                         await Navigator.of(context)

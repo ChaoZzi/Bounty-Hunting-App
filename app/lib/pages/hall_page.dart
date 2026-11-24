@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../core/api.dart';
-import '../core/app_config.dart';
 import '../core/theme.dart';
 import 'login_page.dart';
 import 'mine_page.dart';
@@ -149,7 +148,7 @@ class _HallPageState extends State<HallPage> {
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         itemCount: _tasks.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
         itemBuilder: (_, i) => _taskCard(_tasks[i]),
       ),
     );

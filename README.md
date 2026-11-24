@@ -103,6 +103,24 @@ flutter build apk --release --dart-define=API_BASE=http://<你电脑的局域网
 
 > 启动 App 后可在「设置」里直接修改服务器地址，IP 变了不用重新打包。
 
+### 4. 开发调试（推荐用脚本）
+
+```powershell
+scripts\run-app.ps1              # 自动探测 IP + 热重载
+scripts\run-app.ps1 -Reverse     # 走 USB 反向代理，不需要同一 WiFi
+scripts\run-app.ps1 -Release     # 打 release 包
+scripts\run-app.ps1 -DryRun      # 只看会执行什么，不真跑
+```
+
+它会做四件事：
+
+1. 探测本机局域网 IP（排除 VMware / Hyper-V / WSL 虚拟网卡）
+2. 检查后端是否在线，没起会提示先跑 `start.bat`
+3. 确认手机已连接且已授权
+4. 带上 `--dart-define=API_BASE=http://<ip>:8080` 启动
+
+这样就不会再出现「装上去连 10.0.2.2 连不上」的问题。
+
 ---
 
 ## 默认账号与地址

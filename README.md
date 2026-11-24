@@ -17,12 +17,12 @@ Bounty Hunting App/
 │   ├── bounty-service/     业务逻辑
 │   ├── bounty-api/         接口层
 │   ├── bounty-job/         定时任务
-│   └── bounty-boot/        启动与配置
+│   ├── bounty-boot/        启动与配置
+│   └── db/                 建表 SQL 与演示数据（MySQL 容器初始化时读取）
 ├── admin/                  Vue3 管理后台
-├── db/                     建表脚本与演示数据
 ├── docs/                   技术选型 / 设计规范 / 接口清单 / 本地运行方案
 ├── scripts/                开机自启等辅助脚本
-├── docker-compose.yml      MySQL + Redis + 后端
+├── docker-compose.yml      MySQL + Redis
 ├── start.bat               一键启动
 └── stop.bat                停止
 ```

@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @RestControllerAdvice
@@ -35,6 +36,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoHandlerFoundException.class)
     public Result<Void> handleNotFound(NoHandlerFoundException e) {
+        return Result.fail(ResultCode.NOT_FOUND);
+    }
+
+    /**
+     * 静态资源找不到（Spring 6.1 起不再走 NoHandlerFoundException）。
+     *
+     * 【为什么要单独处理】
+     * 它本质上是一个 404，不是系统故障。
+     * 如果落到下面的 Exception 兜底里，会把一次「访问了不存在的图片/页面」
+     * 记成 ERROR + 完整堆栈，日志会被噪音淹没，真正的问题反而看不见。
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public Result<Void> handleNoResource(NoResourceFoundException e) {
+        log.debug("静态资源不存在: {}", e.getResourcePath());
         return Result.fail(ResultCode.NOT_FOUND);
     }
 

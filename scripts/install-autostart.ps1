@@ -1,4 +1,4 @@
-﻿# 注册开机自启：登录 Windows 后自动拉起 Docker 与悬赏平台服务
+﻿# 注册开机自启：登录 Windows 后自动拉起 PostgreSQL 与悬赏平台服务
 # 用法：右键「使用 PowerShell 运行」
 
 $ErrorActionPreference = 'Stop'
@@ -21,7 +21,7 @@ $settings = New-ScheduledTaskSettingsSet -StartWhenAvailable `
 
 Register-ScheduledTask -TaskName $taskName `
     -Action $action -Trigger $trigger -Settings $settings `
-    -Description '登录后自动启动悬赏平台本地服务（Docker + MySQL + Redis + 后端）' `
+    -Description '登录后自动启动悬赏平台本地服务（PostgreSQL + Redis + 后端）' `
     -Force | Out-Null
 
 Write-Host "已注册计划任务：$taskName" -ForegroundColor Green

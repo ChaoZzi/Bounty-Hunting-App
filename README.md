@@ -18,11 +18,11 @@ Bounty Hunting App/
 │   ├── bounty-api/         接口层
 │   ├── bounty-job/         定时任务
 │   ├── bounty-boot/        启动与配置
-│   └── db/                 建表 SQL 与演示数据（MySQL 容器初始化时读取）
+│   └── db/                 建表 SQL 与演示数据（PostgreSQL 初始化时读取）
 ├── admin/                  Vue3 管理后台
 ├── docs/                   技术选型 / 设计规范 / 接口清单 / 本地运行方案
 ├── scripts/                开机自启等辅助脚本
-├── docker-compose.yml      MySQL + Redis
+├── docker-compose.yml      PostgreSQL + Redis
 ├── start.bat               一键启动
 └── stop.bat                停止
 ```
@@ -36,7 +36,7 @@ Bounty Hunting App/
 | JDK | 21 | 已装 |
 | Maven | 3.9+ | 已装 |
 | Node.js | 18+ | 已装 |
-| Docker Desktop | 最新 | 必须运行 |
+| Docker Desktop | 最新 | 可选（用本机原生 PostgreSQL 时不需要） |
 | Flutter | 3.x | `D:\dev\flutter` |
 | Android SDK | 34+ | `D:\dev\android-sdk` |
 
@@ -48,7 +48,7 @@ Bounty Hunting App/
 
 双击 **`start.bat`**
 
-它会自动：启动 Docker → 拉起 mysql / redis 容器 → 等待数据库就绪 → 用本机 Java 21 启动后端 → 打印手机可用的局域网地址。
+它会自动：启动本机 PostgreSQL 服务（没有服务则用 Docker 起容器）→ 等待数据库就绪 → 用本机 Java 21 启动后端 → 打印手机可用的局域网地址。
 
 首次启动会初始化数据库并写入 5 条演示任务。
 
@@ -58,9 +58,9 @@ Bounty Hunting App/
 http://127.0.0.1:8080/api/v1/health
 ```
 
-> **架构说明**：数据库跑在 Docker 里，后端直接跑在本机 Java 上。
-> 这样改完代码 `mvn package` 后重启只要几秒，断点调试也能直接用；
-> 数据库仍然隔离在容器里，不污染 Windows，随时可以 `down` 掉重来。
+> **架构说明**：数据库是本机原生 PostgreSQL 16（Windows 服务 `postgresql-x64-16`，端口 5432），后端直接跑在本机 Java 上。
+> 这样改完代码 `mvn package` 后重启只要几秒，断点调试也能直接用。
+> 想改成容器版数据库，用 `docker-compose.yml` 里的 `postgres` 服务（映射到 5433），再把 `application-local.yml` 的端口改掉即可。
 > `server/Dockerfile` 保留着，将来整套搬到服务器时才用。
 
 ### 2. 打开管理后台
@@ -129,7 +129,7 @@ scripts\run-app.ps1 -DryRun      # 只看会执行什么，不真跑
 |---|---|
 | 后端 | `http://127.0.0.1:8080` |
 | 管理后台 | `http://127.0.0.1:8080/admin-ui/`（开发模式 5173） |
-| MySQL | `127.0.0.1:3307`，root / root123456 |
+| PostgreSQL | `127.0.0.1:5432`，bounty / bounty123456（超级用户 postgres / 123456） |
 | Redis | `127.0.0.1:6380` |
 | 后台账号 | admin / admin123 |
 | 短信验证码 | **固定 `123456`**（本地 Mock，可重复使用） |
@@ -149,14 +149,16 @@ cd server && mvn -DskipTests package && cd ..
 powershell -File scripts\start-backend.ps1
 powershell -File scripts\stop-backend.ps1
 
-:: 只看数据库容器
-docker compose ps
-docker compose logs -f mysql
+:: 连数据库
+psql -h 127.0.0.1 -p 5432 -U bounty -d bounty
 
-:: 数据库整个重置（会清空数据，并重新导入演示数据）
-docker compose down
-rmdir /s /q data\mysql
-docker compose up -d
+:: 重新导入表结构与演示数据（会清空数据）
+psql -h 127.0.0.1 -p 5432 -U bounty -d bounty -f server\db\schema.sql
+psql -h 127.0.0.1 -p 5432 -U bounty -d bounty -f server\db\data.sql
+
+:: 若走容器版数据库
+docker compose ps
+docker compose logs -f postgres
 
 :: 后端日志
 Get-Content logs\app.log -Wait -Tail 50
@@ -225,8 +227,10 @@ Unregister-ScheduledTask -TaskName BountyAppServer -Confirm:$false
 
 | 现象 | 原因 | 解法 |
 |---|---|---|
-| 接口中文变乱码 | `data.sql` 缺 `SET NAMES utf8mb4`，导入时双重编码 | 文件首行加 `SET NAMES utf8mb4` |
-| 改了 SQL 但数据没变 | `data/mysql` 是 bind mount，`down -v` 删不掉 | 手动删 `data\mysql` 再 `up` |
+| 建表报 `relation "idx_xxx" already exists` | PostgreSQL 的索引名是**全库唯一**的（MySQL 是每表唯一），多张表用同名索引就撞 | 索引 / 唯一约束名统一带表前缀：`idx_task_*` / `uk_pay_*` |
+| 写 JSON 列报 `column steps is of type jsonb but expression is of type character varying` | Java 的 `String` 按 varchar 发过去，pgjdbc 不会自动转 jsonb | JDBC url 加 `stringtype=unspecified` |
+| 接口中文变乱码 | 导入时客户端编码不是 UTF8 | `psql` 前设 `PGCLIENTENCODING=UTF8`，脚本首行 `SET client_encoding = 'UTF8'` |
+| 改了 SQL 但数据没变 | 容器版 `data/postgres` 是 bind mount，`down -v` 删不掉 | 手动删 `data\postgres` 再 `up` |
 | 分页 `total` 恒为 0 | 没注册 `PaginationInnerInterceptor` | `MybatisPlusConfig` 里注册 |
 | 脚本中文报「字符串未终止」 | Windows PowerShell 5.1 按 GBK 读 UTF-8 脚本 | `.ps1` 必须存成 **UTF-8 with BOM** |
 | `Unable to access jarfile D:\Bounty` | 路径含空格没加引号 | `-ArgumentList` 里给 jar 路径套 `"` |

@@ -17,7 +17,7 @@ public class MybatisPlusConfig {
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-        PaginationInnerInterceptor pagination = new PaginationInnerInterceptor(DbType.MYSQL);
+        PaginationInnerInterceptor pagination = new PaginationInnerInterceptor(DbType.POSTGRE_SQL);
         // 单页最大条数，防止前端传 pageSize=99999 打爆数据库
         pagination.setMaxLimit(200L);
         interceptor.addInnerInterceptor(pagination);

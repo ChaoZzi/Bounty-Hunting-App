@@ -1,9 +1,12 @@
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3307/bounty?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&useSSL=false&rewriteBatchedStatements=true
-    username: root
-    password: root123456
+    driver-class-name: org.postgresql.Driver
+    # stringtype=unspecified：让 Java 的 String 直接写入 jsonb 列（steps / images），否则会报
+    #   "column steps is of type jsonb but expression is of type character varying"
+    # reWriteBatchedInserts：批量插入改写为多行 VALUES，对应 MySQL 的 rewriteBatchedStatements
+    url: jdbc:postgresql://localhost:5432/bounty?stringtype=unspecified&reWriteBatchedInserts=true&ApplicationName=bounty
+    username: bounty
+    password: bounty123456
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2

@@ -1,25 +1,23 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: bounty-mysql
+  postgres:
+    image: postgres:16-alpine
+    container_name: bounty-postgres
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: root123456
-      MYSQL_DATABASE: bounty
+      POSTGRES_DB: bounty
+      POSTGRES_USER: bounty
+      POSTGRES_PASSWORD: bounty123456
       TZ: Asia/Shanghai
+      PGTZ: Asia/Shanghai
     ports:
-      - "3307:3306"
+      # 本机已安装 PostgreSQL 16 占用了 5432，容器对外用 5433，避免端口冲突
+      - "5433:5432"
     volumes:
-      - ./data/mysql:/var/lib/mysql
+      - ./data/postgres:/var/lib/postgresql/data
       - ./server/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
       - ./server/db/data.sql:/docker-entrypoint-initdb.d/02-data.sql:ro
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_0900_ai_ci
-      - --default-time-zone=+08:00
-      - --max_connections=200
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot123456"]
+      test: ["CMD-SHELL", "pg_isready -U bounty -d bounty"]
       interval: 5s
       timeout: 3s
       retries: 30
@@ -44,3 +42,6 @@ services:
 #   后端（bounty-app.jar）不放在容器里，直接跑在本机 Java 21 上。
 #   原因：本地开发改完代码重启只要几秒，日志直接看见，也不用拉 JRE 基础镜像。
 #   只有在需要「整套搬家到服务器」时，才用 server/Dockerfile 构建 app 镜像。
+#
+#   若走容器版数据库，application-local.yml 的端口要改成 5433；
+#   本机原生 PostgreSQL 16 则保持 5432。
